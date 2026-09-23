@@ -40,12 +40,16 @@ claude plugin install cost-hygiene@claude-cost-hygiene
 Then, inside Claude Code, run `/cost-hygiene-setup` once to install the status
 line, and restart. The hooks and the two audit skills work immediately.
 
-From a local checkout (loads in place, so edits apply without reinstalling):
+From a local checkout:
 
 ```
 claude plugin marketplace add /path/to/claude-cost-hygiene
 claude plugin install cost-hygiene@claude-cost-hygiene
 ```
+
+The install is a copy of the committed tree, so after editing the plugin,
+commit and run `claude plugin update cost-hygiene@claude-cost-hygiene`, then
+restart Claude Code.
 
 ## Pricing assumptions
 
