@@ -61,19 +61,29 @@ esac
 [ "$fast" = "true" ] && out="$out $(esc '1;97;41') FAST \$\$ ${R}"
 
 # Subagents active in the last 2 minutes: model and current context each.
-# Reads an undocumented layout (<session>/subagents/agent-*.jsonl), so any
-# failure just prints nothing.
+# Reads an undocumented layout (<session>/subagents/agent-*.jsonl), so it
+# shows a warning when that layout stops matching: the session has spawned
+# an agent but no agent files exist, or a recent agent file has assistant
+# entries without a readable model and usage.
 sub="${tp%.jsonl}/subagents"
-if [ -n "$tp" ] && [ -d "$sub" ]; then
+if [ -n "$tp" ]; then
   now=$(date +%s)
-  agents=""
+  agents=""; broken=""; found=""
   for f in "$sub"/agent-*.jsonl; do
     [ -f "$f" ] || continue
+    found=1
     mt=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null) || continue
     [ $((now - mt)) -le 120 ] || continue
-    a=$(tail -n 40 "$f" | jq -rs '[.[] | select(.message.usage)] | last // empty
-      | "\(.message.model) \((.message.usage | .input_tokens + .cache_read_input_tokens + .cache_creation_input_tokens) / 1000 | floor)"' 2>/dev/null)
+    # fromjson? skips a last line that is still being written.
+    a=$(tail -n 40 "$f" | jq -Rrs '[split("\n")[] | fromjson? | select(.type == "assistant")]
+      | if . == [] then empty else
+          (map(select(.message.model and .message.usage.input_tokens != null)) | last) as $m
+          | if $m == null then "?" else
+              "\($m.message.model) \($m.message.usage | ((.input_tokens // 0) + (.cache_read_input_tokens // 0) + (.cache_creation_input_tokens // 0)) / 1000 | floor)"
+            end
+        end' 2>/dev/null) || a="?"
     [ -n "$a" ] || continue
+    [ "$a" = "?" ] && { broken=1; continue; }
     am=${a% *}; ak=${a##* }
     case "$am" in
       *haiku*)  a="$(esc 2)haiku ${ak}k${R}" ;;
@@ -84,6 +94,11 @@ if [ -n "$tp" ] && [ -d "$sub" ]; then
     esac
     agents="${agents:+$agents, }$a"
   done
+  if [ -z "$found" ] && [ -f "$tp" ] &&
+     grep -qE '"type":"tool_use","id":"[^"]*","name":"(Agent|Task)"' "$tp" 2>/dev/null; then
+    broken=1
+  fi
+  [ -n "$broken" ] && agents="${agents:+$agents, }$(esc '1;93')⚠ agent status unreadable${R}"
   [ -n "$agents" ] && out="$out | agents: $agents"
 fi
 

@@ -23,8 +23,8 @@ prompt cache: a warm countdown, a warning when it is about to expire on a big
 context, and when it has gone cold, the estimated cost of the next message. A
 recent cache miss is named so you can avoid repeating its cause. Subagents
 active in the last two minutes are listed with their model and context size;
-this reads an undocumented transcript layout, so it may stop showing after a
-Claude Code update.
+this reads an undocumented transcript layout, so after a Claude Code update
+that changes it the segment shows `⚠ agent status unreadable` instead.
 
 ```
 Opus high | 136k heavy: /compact soon | cache warm 42m
