@@ -47,9 +47,10 @@ claude plugin marketplace add /path/to/claude-cost-hygiene
 claude plugin install cost-hygiene@claude-cost-hygiene
 ```
 
-The install is a copy of the committed tree, so after editing the plugin,
-commit and run `claude plugin update cost-hygiene@claude-cost-hygiene`, then
-restart Claude Code.
+The install is a copy of the committed tree. After editing the plugin, bump
+`version` in `.claude-plugin/plugin.json` (the updater treats an unchanged
+version as current), commit, run `claude plugin update cost-hygiene@claude-cost-hygiene`,
+and restart Claude Code.
 
 ## Pricing assumptions
 
