@@ -10,6 +10,7 @@ eval "$(printf '%s' "$input" | jq -r '
   "model=" + ((.model.display_name // "Claude") | sub(" \\(.*\\)$"; "") | @sh),
   "effort=" + ((.effort.level // "") | @sh),
   "fast=" + ((.fast_mode // false) | tostring | @sh),
+  "tp=" + ((.transcript_path // "") | @sh),
   "tok=" + ((
     (.context_window.current_usage // null) as $u
     | if $u then (($u.input_tokens // 0) + ($u.cache_creation_input_tokens // 0) + ($u.cache_read_input_tokens // 0))
@@ -58,6 +59,33 @@ case "$effort" in
 esac
 
 [ "$fast" = "true" ] && out="$out $(esc '1;97;41') FAST \$\$ ${R}"
+
+# Subagents active in the last 2 minutes: model and current context each.
+# Reads an undocumented layout (<session>/subagents/agent-*.jsonl), so any
+# failure just prints nothing.
+sub="${tp%.jsonl}/subagents"
+if [ -n "$tp" ] && [ -d "$sub" ]; then
+  now=$(date +%s)
+  agents=""
+  for f in "$sub"/agent-*.jsonl; do
+    [ -f "$f" ] || continue
+    mt=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null) || continue
+    [ $((now - mt)) -le 120 ] || continue
+    a=$(tail -n 40 "$f" | jq -rs '[.[] | select(.message.usage)] | last // empty
+      | "\(.message.model) \((.message.usage | .input_tokens + .cache_read_input_tokens + .cache_creation_input_tokens) / 1000 | floor)"' 2>/dev/null)
+    [ -n "$a" ] || continue
+    am=${a% *}; ak=${a##* }
+    case "$am" in
+      *haiku*)  a="$(esc 2)haiku ${ak}k${R}" ;;
+      *sonnet*) a="$(esc 2)sonnet ${ak}k${R}" ;;
+      *fable*)  a="$(esc '1;97;45')fable ${ak}k${R}" ;;
+      *opus*)   a="opus ${ak}k" ;;
+      *)        a="$am ${ak}k" ;;
+    esac
+    agents="${agents:+$agents, }$a"
+  done
+  [ -n "$agents" ] && out="$out | agents: $agents"
+fi
 
 # Context and cache are always shown (both can be acted on); advice text
 # appears only once there is something to do.

@@ -21,11 +21,15 @@ for a whole session when only one hard step needed it.
 Shows model, effort, context size with an escalating `/compact` nudge, and the
 prompt cache: a warm countdown, a warning when it is about to expire on a big
 context, and when it has gone cold, the estimated cost of the next message. A
-recent cache miss is named so you can avoid repeating its cause.
+recent cache miss is named so you can avoid repeating its cause. Subagents
+active in the last two minutes are listed with their model and context size;
+this reads an undocumented transcript layout, so it may stop showing after a
+Claude Code update.
 
 ```
 Opus high | 136k heavy: /compact soon | cache warm 42m
 Opus high | 210k HEAVY: /compact now | COLD: next msg ~$1.68
+Opus high | agents: haiku 64k, opus 112k | 88k | cache warm 55m
 ```
 
 Requires `jq`.
