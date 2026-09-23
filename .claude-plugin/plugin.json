@@ -1,0 +1,11 @@
+{
+  "name": "cost-hygiene",
+  "version": "0.1.0",
+  "description": "Keep Claude Code sessions cheap: per-prompt model/effort/context note, effort-escalation guidance, session and PR cost audits, and a cold-cache status line.",
+  "author": {
+    "name": "Peter Wagenet"
+  },
+  "repository": "https://github.com/peterwagenet/claude-cost-hygiene",
+  "license": "MIT",
+  "keywords": ["cost", "cache", "context", "effort", "audit", "statusline"]
+}

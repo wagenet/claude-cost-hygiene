@@ -1,0 +1,27 @@
+{
+  "description": "Session-state note on every prompt, and effort-escalation guidance at session start.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/session-context.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

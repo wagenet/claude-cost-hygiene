@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "claude-cost-hygiene",
+  "description": "Marketplace for the cost-hygiene plugin.",
+  "owner": {
+    "name": "Peter Wagenet"
+  },
+  "plugins": [
+    {
+      "name": "cost-hygiene",
+      "description": "Keep Claude Code sessions cheap: per-prompt model/effort/context note, effort-escalation guidance, session and PR cost audits, and a cold-cache status line.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}
