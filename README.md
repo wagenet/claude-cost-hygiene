@@ -11,7 +11,7 @@ for a whole session when only one hard step needed it.
 | Piece | Mechanism | Effect |
 |---|---|---|
 | Session-state note | `UserPromptSubmit` hook | Every prompt tells Claude the current model, effort level, and context size, read from the transcript. Claude cannot otherwise see these. |
-| Effort escalation | `SessionStart` hook | After two failures on the same root cause, Claude stops and suggests `/effort high s` (or, if already high, something else). Re-injected after compaction. |
+| Effort escalation | `SessionStart` hook | After two failures on the same root cause, Claude stops and suggests `/effort high s`; if already high, `/effort xhigh s` only when the problem is reasoning depth, otherwise more context or a different approach. Re-injected after compaction. |
 | `/session-cost-audit [--days N] [--top N]` | skill + script | Prices every session on this machine with Claude Code's own formula and flags the ones that broke a cost rule. |
 | `/pr-cost <branch or PR#>` | skill + script | Sums what one branch cost across sessions, worktrees, and subagents. |
 | `/cost-hygiene-setup` | skill + installer | Installs the status line (below). One-time, because plugins cannot set `statusLine`. |
