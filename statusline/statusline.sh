@@ -20,7 +20,16 @@ eval "$(printf '%s' "$input" | jq -r '
   "cwarm=" + ((if .prompt_cache.warm == null then "none" else (.prompt_cache.warm | tostring) end) | @sh),
   "cexp=" + ((.prompt_cache.expires_at // 0) | tostring | @sh),
   "crecache=" + ((.prompt_cache.recache_tokens_if_cold // 0) | tostring | @sh),
-  "mcause=" + ((.prompt_cache.last_miss_cause // "") | tostring | .[0:40] | @sh),
+  "mcause=" + ((.prompt_cache.last_miss_cause // "") as $c
+    | (if ($c | type) == "string" then (try ($c | fromjson) catch $c) else $c end)
+    | (if type == "object" then (.causes // [])
+       elif type == "array" then .
+       elif . == "" then []
+       else [tostring] end)
+    | map(tostring
+      | if test("^ttl_expired_") then "idle >" + sub("^ttl_expired_"; "")
+        else gsub("_"; " ") end)
+    | join(", ") | .[0:40] | @sh),
   "mat=" + ((.prompt_cache.last_miss_at // null) as $t
     | (if $t == null then 0
        elif ($t | type) == "number" then (if $t > 1e12 then $t / 1000 else $t end)
@@ -97,7 +106,13 @@ fi
 # mid-session). Small contexts are skipped since the rebuild is cheap.
 miss=""
 if [ -n "$mcause" ] && [ "$tok" -ge 50000 ] 2>/dev/null && [ "$mat" -gt 0 ] 2>/dev/null; then
-  [ $(( $(date +%s) - mat )) -le 600 ] && miss=" | $(esc 33)cache miss: ${mcause}${R}"
+  if [ $(( $(date +%s) - mat )) -le 600 ]; then
+    # Idle expiry (cyan) is expected but costly; other causes (yellow) are avoidable.
+    case "$mcause" in
+      idle*) miss=" | $(esc "1;96")cache rebuilt: ${mcause}${R}" ;;
+      *)     miss=" | $(esc "1;93")cache miss: ${mcause}${R}" ;;
+    esac
+  fi
 fi
 
 printf '%s%s%s%s\n' "$out" "$ctx" "$cache" "$miss"
