@@ -33,7 +33,7 @@ Requires `jq`.
 ## Install
 
 ```
-claude plugin marketplace add peterwagenet/claude-cost-hygiene
+claude plugin marketplace add wagenet/claude-cost-hygiene
 claude plugin install cost-hygiene@claude-cost-hygiene
 ```
 

@@ -5,7 +5,7 @@
   "author": {
     "name": "Peter Wagenet"
   },
-  "repository": "https://github.com/peterwagenet/claude-cost-hygiene",
+  "repository": "https://github.com/wagenet/claude-cost-hygiene",
   "license": "MIT",
   "keywords": ["cost", "cache", "context", "effort", "audit", "statusline"]
 }
