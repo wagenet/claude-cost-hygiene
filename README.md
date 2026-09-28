@@ -11,6 +11,7 @@ for a whole session when only one hard step needed it.
 | Piece | Mechanism | Effect |
 |---|---|---|
 | Session-state note | `UserPromptSubmit` hook | Every prompt tells Claude the current model, effort level, and context size, read from the transcript. Claude cannot otherwise see these. |
+| Cache-expiry alert | `Stop` hook + background timer | Ten minutes before an idle session's prompt cache expires, a desktop notification gives the cost of resuming cold and the options: reply to keep it warm, `/compact` while that is cheap, or `/clear`. Only for contexts of 50k+ on the 1h cache; cancelled by the next prompt, compaction, or session end. macOS (`osascript`) or Linux (`notify-send`). Set `COST_HYGIENE_CACHE_ALERT=0` to turn it off. |
 | Effort escalation | `SessionStart` hook | After two failures on the same root cause, Claude stops and suggests `/effort high s`; if already high, `/effort xhigh s` only when the problem is reasoning depth, otherwise more context or a different approach. Re-injected after compaction. |
 | `/session-cost-audit [--days N] [--top N]` | skill + script | Prices every session on this machine with Claude Code's own formula and flags the ones that broke a cost rule. |
 | `/pr-cost <branch or PR#>` | skill + script | Sums what one branch cost across sessions, worktrees, and subagents. |
@@ -19,8 +20,8 @@ for a whole session when only one hard step needed it.
 ### Status line
 
 Shows model, effort, context size with an escalating `/compact` nudge, and the
-prompt cache: a warm countdown, a warning when it is about to expire on a big
-context, and when it has gone cold, the estimated cost of the next message. A
+prompt cache: a warm countdown, a warning with what to do when it is about to
+expire on a big context, and when it has gone cold, the estimated cost of the next message. A
 recent cache miss is named so you can avoid repeating its cause. Subagents
 active in the last two minutes are listed with their model and context size;
 this reads an undocumented transcript layout, so after a Claude Code update
@@ -68,9 +69,10 @@ script in `scripts/`.
 ```
 .claude-plugin/plugin.json       manifest
 .claude-plugin/marketplace.json  lets the repo be added as a marketplace
-hooks/hooks.json                 registers the two hooks
+hooks/hooks.json                 registers the hooks
 hooks/session-context.py         UserPromptSubmit: session-state note
 hooks/session-start.py           SessionStart: effort-escalation rule
+hooks/cache-alert.py             Stop and cancel hooks: cache-expiry alert
 scripts/session-cost-audit.py    /session-cost-audit
 scripts/pr-cost.py               /pr-cost
 scripts/install-statusline.sh    /cost-hygiene-setup
