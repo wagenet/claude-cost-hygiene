@@ -121,9 +121,10 @@ if [ "$cwarm" != "none" ]; then
   now=$(date +%s)
   if [ "$cwarm" = "true" ] && [ "$cexp" -gt "$now" ] 2>/dev/null; then
     mins=$(( (cexp - now + 59) / 60 ))
-    # Near expiry on a big context, replying soon avoids a costly rewrite.
+    # Near expiry on a big context: reply or compact now to avoid a costly
+    # rewrite later (/clear if done).
     if [ "$mins" -le 10 ] && [ "$tok" -ge 50000 ] 2>/dev/null; then
-      cache=" | $(esc 33)cache expires in ${mins}m${R}"
+      cache=" | $(esc '1;33')cache expires in ${mins}m: reply, /compact or /clear${R}"
     else
       cache=" | $(esc 2)cache warm ${mins}m${R}"
     fi
