@@ -3,7 +3,7 @@
 
 Reads the tail of the session transcript and finds the last assistant request.
 Falls back to settings.json before the first request, and on that request alone
-adds a nudge to suggest a cheaper model for small tasks. Never blocks; on any
+adds a nudge to ask about a cheaper model for small tasks. Never blocks; on any
 error it prints {} and exits 0.
 """
 import json, os, sys
@@ -13,9 +13,10 @@ TAIL_BYTES = 400_000
 # Fires once per session: switching models later discards the prompt cache.
 MODEL_NUDGE = (
     ' If this task is clearly PR-sized or smaller and the session is on Opus, '
-    'say so in one line before starting, with the command: `/model sonnet`, or '
-    '`/model haiku` for trivial or batch work. For large multi-package tasks on '
-    'Opus, mention `/model opusplan`. Do not repeat this later in the session.'
+    'do not start work: ask in one line whether to switch with `/model sonnet` '
+    '(or `/model haiku` for trivial or batch work) or continue on Opus, then end '
+    'the turn. For large multi-package tasks on Opus, ask the same way about '
+    '`/model opusplan`. Do not ask again later in the session.'
 )
 
 
