@@ -2,12 +2,21 @@
 """UserPromptSubmit hook: tell Claude the current model, effort, and context size.
 
 Reads the tail of the session transcript and finds the last assistant request.
-Falls back to settings.json before the first request. Never blocks; on any
+Falls back to settings.json before the first request, and on that request alone
+adds a nudge to suggest a cheaper model for small tasks. Never blocks; on any
 error it prints {} and exits 0.
 """
 import json, os, sys
 
 TAIL_BYTES = 400_000
+
+# Fires once per session: switching models later discards the prompt cache.
+MODEL_NUDGE = (
+    ' If this task is clearly PR-sized or smaller and the session is on Opus, '
+    'say so in one line before starting, with the command: `/model sonnet`, or '
+    '`/model haiku` for trivial or batch work. For large multi-package tasks on '
+    'Opus, mention `/model opusplan`. Do not repeat this later in the session.'
+)
 
 
 def config_dir():
@@ -61,6 +70,9 @@ def main():
         model, effort = from_settings()
         note = 'Session state: first request; settings default model %s, effort %s.' % (
             model or 'unknown', effort or 'unknown')
+        # settings.json misses a --model flag, so an unset or Opus default still nudges.
+        if not model or ('opus' in model and model != 'opusplan'):
+            note += MODEL_NUDGE
     print(json.dumps({'hookSpecificOutput': {
         'hookEventName': 'UserPromptSubmit', 'additionalContext': note}}))
 

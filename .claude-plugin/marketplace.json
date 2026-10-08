@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "cost-hygiene",
-      "description": "Keep Claude Code sessions cheap: per-prompt model/effort/context note, effort-escalation guidance, session and PR cost audits, and a cold-cache status line.",
+      "description": "Keep Claude Code sessions cheap: per-prompt model/effort/context note, effort-escalation and model-choice guidance, session and PR cost audits, and a cold-cache status line.",
       "source": "./",
       "category": "productivity"
     }

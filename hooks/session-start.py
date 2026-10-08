@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""SessionStart hook: inject the effort-escalation rule as context.
+"""SessionStart hook: inject the effort-escalation and model-choice rules as context.
 
-Plugins cannot add to CLAUDE.md, so the rule is delivered here instead. It runs
+Plugins cannot add to CLAUDE.md, so the rules are delivered here instead. It runs
 on startup, resume, clear, and after compaction, so the rule survives
 compaction. Never blocks; on any error it prints {} and exits 0.
 """
@@ -23,11 +23,20 @@ RULE = (
     "done, remind the user to drop effort back to their default."
 )
 
+MODEL_RULE = (
+    "Model choice (cost-hygiene plugin): when spawning subagents, set `model` by "
+    "task shape. opus: open-ended, multi-package, or design work. sonnet: "
+    "well-scoped, PR-sized changes; CI or incident triage. haiku: clearly specified "
+    "small changes, search and lookup, batch or high-volume jobs; never "
+    "multi-package work. You cannot change the main session's model; only the user "
+    "can, with `/model`."
+)
+
 
 def main():
     sys.stdin.read()
     print(json.dumps({'hookSpecificOutput': {
-        'hookEventName': 'SessionStart', 'additionalContext': RULE}}))
+        'hookEventName': 'SessionStart', 'additionalContext': RULE + '\n\n' + MODEL_RULE}}))
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 {
   "name": "cost-hygiene",
-  "version": "0.1.5",
-  "description": "Keep Claude Code sessions cheap: per-prompt model/effort/context note, effort-escalation guidance, session and PR cost audits, and a cold-cache status line.",
+  "version": "0.1.6",
+  "description": "Keep Claude Code sessions cheap: per-prompt model/effort/context note, effort-escalation and model-choice guidance, session and PR cost audits, and a cold-cache status line.",
   "author": {
     "name": "Peter Wagenet"
   },

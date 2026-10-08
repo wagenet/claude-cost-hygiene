@@ -12,6 +12,7 @@ for a whole session when only one hard step needed it.
 |---|---|---|
 | Session-state note | `UserPromptSubmit` hook | Every prompt tells Claude the current model, effort level, and context size, read from the transcript. Claude cannot otherwise see these. |
 | Effort escalation | `SessionStart` hook | After two failures on the same root cause, Claude stops and suggests `/effort high s`; if already high, `/effort xhigh s` only when the problem is reasoning depth, otherwise more context or a different approach. Re-injected after compaction. |
+| Model choice | `SessionStart` + `UserPromptSubmit` hooks | Subagents get a model by task shape: Opus for open-ended or multi-package work, Sonnet for PR-sized work and triage, Haiku for small, search, or batch jobs. On a session's first prompt, if the default is Opus and the task is small, Claude suggests `/model sonnet` before starting, while switching is still free. |
 | `/session-cost-audit [--days N] [--top N]` | skill + script | Prices every session on this machine with Claude Code's own formula and flags the ones that broke a cost rule. |
 | `/pr-cost <branch or PR#>` | skill + script | Sums what one branch cost across sessions, worktrees, and subagents. |
 | `/cost-hygiene-setup` | skill + installer | Installs the status line (below). One-time, because plugins cannot set `statusLine`. |
@@ -69,8 +70,8 @@ script in `scripts/`.
 .claude-plugin/plugin.json       manifest
 .claude-plugin/marketplace.json  lets the repo be added as a marketplace
 hooks/hooks.json                 registers the two hooks
-hooks/session-context.py         UserPromptSubmit: session-state note
-hooks/session-start.py           SessionStart: effort-escalation rule
+hooks/session-context.py         UserPromptSubmit: session-state note, first-prompt model nudge
+hooks/session-start.py           SessionStart: effort-escalation and model-choice rules
 scripts/session-cost-audit.py    /session-cost-audit
 scripts/pr-cost.py               /pr-cost
 scripts/install-statusline.sh    /cost-hygiene-setup
