@@ -15,8 +15,9 @@ MODEL_NUDGE = (
     ' If this task is clearly PR-sized or smaller and the session is on Opus, '
     'do not start work: ask in one line whether to switch with `/model sonnet` '
     '(or `/model haiku` for trivial or batch work) or continue on Opus, then end '
-    'the turn. For large multi-package tasks on Opus, ask the same way about '
-    '`/model opusplan`. Do not ask again later in the session.'
+    'the turn. For anything larger, continue on Opus without asking: '
+    '`/model opusplan` would be a downgrade, since it uses Opus only for planning. '
+    'Do not ask again later in the session.'
 )
 
 
